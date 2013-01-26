@@ -1,5 +1,6 @@
 // Scutl -- Simple C++ Unit Testing Library
 // ========================================
+// Version 0.0.0
 //
 // Scutl is a unit testing library that makes it painless to add unit tests to
 // your software with a minimum of hassle. The entire library implementation
