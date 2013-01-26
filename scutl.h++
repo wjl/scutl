@@ -82,7 +82,6 @@
 // TODO: handle test fixtures
 // TODO: run or exclude specific tests or suites
 
-#include <exception>
 #include <list>
 #include <string>
 
