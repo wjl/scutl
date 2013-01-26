@@ -53,15 +53,10 @@
 #ifndef SCUTL__header__
 #define SCUTL__header__
 
-// TODO: what exceptions required?
-// TODO: what macros required?
-// TODO: look at CheckMacros.h to implement ASSERT/REQUIRE
-// TODO: look at TestMacros.h to implement SUITE
-// TODO: look at Boost Test to see other types of checks / features
 // TODO: look at crpcut for other features
 // TODO: implement INFO stream like crpcut (probably just stdout)
 // TODO: run tests in separate directory and process like crpcut
-// TODO: handle uncaught exceptions (catch (...), void unexpected(), etc)
+// TODO: handle uncatchable exceptions (e.g. unexpected())
 // TODO: handle exit/abort and assertions from <cassert>
 // TODO: handle crashes
 // TODO: handle signals -- see posix/SignalTranslator.h and crpcut
@@ -74,13 +69,14 @@
 // TODO: report each check (pass/fail/results)
 // TODO: report stream activity (stdout, stderr)
 // TODO: report end of test (elapsed time)
-// TODO: report summary (tests: pass/total, checks: pass/total, elapsed time)
 // TODO: TAP output for use with prove
-// TODO: ASSERT/REQUIRE use class members or global variables?
+// TODO: thread safety: ASSERT/REQUIRE using test class members instead of global variables?
+// TODO: multithreaded test running
 // TODO: automatic timing
-// TODO: handle expected failures
-// TODO: handle test fixtures
+// TODO: handle expected failures (e.g. TODO, TODO_METHOD)
 // TODO: run or exclude specific tests or suites
+// TODO: more levels, e.g. warnings?
+// TODO: assertions for expecting/not-expecting exceptions
 
 #include <list>
 #include <string>
