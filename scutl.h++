@@ -55,10 +55,7 @@
 
 // TODO: handle uncatchable exceptions (e.g. unexpected()? what else is helpful?)
 // TODO: work with valgrind
-// TODO: prefix output "SCUTL: " to distinguish from other stream activity (stdout, stderr)
-// TODO: generic output API refinement
 // TODO: TAP output reporter for use with prove
-// TODO: auto timing & summarizing in reporter base class
 // TODO: assertions for expecting/not-expecting exceptions
 
 // Required standard library headers
