@@ -20,12 +20,12 @@
 //
 //     TEST(one_plus_one) {
 //         int x = 1;
-//         ASSERT(x == 1);
+//         EXPECT(x == 1);
 //     }
 //
 //     TEST(one_plus_one) {
 //         int x = 1;
-//         ASSERT((x+x) == 3);
+//         EXPECT((x+x) == 3);
 //     }
 //
 // To build & run with GCC:
@@ -65,29 +65,18 @@
 // TODO: handle forkbombs
 // TODO: work with valgrind
 // TODO: generic output API ("Test Reporter")
-// TODO: report start of test
-// TODO: report each check (pass/fail/results)
 // TODO: report stream activity (stdout, stderr)
-// TODO: report end of test (elapsed time)
 // TODO: TAP output for use with prove
-// TODO: thread safety: ASSERT/REQUIRE using test class members instead of global variables?
+// TODO: thread safety: EXPECT/REQUIRE using test class members instead of global variables?
 // TODO: multithreaded test running
 // TODO: automatic timing
-// TODO: handle expected failures (e.g. TODO, TODO_METHOD)
 // TODO: run or exclude specific tests or suites
-// TODO: more levels, e.g. warnings?
 // TODO: assertions for expecting/not-expecting exceptions
 
+// Required standard library headers
+#include <iostream>
 #include <list>
 #include <string>
-
-// If the main implementation is requested, we need to add the library
-// implementation as well.
-#ifdef SCUTL_MAIN
-#ifndef SCUTL_LIBRARY
-#define SCUTL_LIBRARY
-#endif
-#endif
 
 // Helper macros for concatenation & stringification.
 #define SCUTL_DETAIL_CONCAT_RAW(a, b) a ## b
@@ -96,6 +85,7 @@
 // Define a test with the given name and provided body.
 //
 //     TEST(name) { body }
+//
 #ifdef TEST
 #error "Scutl wants to provide the TEST macro, but it's already defined!"
 #endif
@@ -115,21 +105,26 @@
 	namespace {\
 	namespace SCUTL_DETAIL_CONCAT(scutl_detail_line_,__LINE__) {\
 \
+	/* The function is implemented in an class inheriting from the provided\
+	 * fixture class. This is done separately from the Test object to ensure\
+	 * that the user's test function does not have a polluted namespace. */\
+	struct Function : fixture {\
+		::scutl::Reporter *scutl_detail_reporter;\
+		void operator()();\
+	};\
+\
 	/* Define our Test class */\
 	struct Test : ::scutl::detail::Test {\
 		Test() {\
-			na##me = #name;\
-			file = __FILE__;\
-			line = __LINE__;\
+			info.na##me = #name;\
+			info.file = __FILE__;\
+			info.line = __LINE__;\
 		}\
-		virtual void operator()() const override { function(); };\
-		/* The function is implemented in an inner class inheriting from the\
-		 * provided fixture class to ensure that the user's test function\
-		 * does not have a polluted namespace. */\
-		struct Function : fixture {\
-			void operator()();\
+		virtual void operator()(::scutl::Reporter &reporter) {\
+			function.scutl_detail_reporter = &reporter;\
+			function();\
 		};\
-		mutable Function function;\
+		Function function;\
 	};\
 \
 	/* Create an instance of the test */\
@@ -140,36 +135,46 @@
 \
 	/* Define our test function's body */\
 	void SCUTL_DETAIL_CONCAT(scutl_detail_line_,__LINE__)\
-		::Test::Function::operator()()
+		::Function::operator()()
+
 
 // Helper macro for impementing assertions.
 #define SCUTL_DETAIL_ASSERT(expression, assertion, required)\
 \
-	/* Wrap in do/while to give an anonymous scope */\
+	/* Wrap in do/while to give an anonymous scope. */\
 	do {\
-		/* Collect the results into an Results object. */\
-		::scutl::detail::Results results (\
-			assertion #expression,\
-			__FILE__,\
-			__LINE__,\
-			(expression)\
-		);\
+		/* Until we have evaluated the expression, we have to use fully\
+		 * qualified variable names */\
+\
+		/* Collect information about the assertion. */\
+		::scutl::Assertion_Info scutl_detail_info;\
+		scutl_detail_info.requ##ired = required;\
+		scutl_detail_info.expre##ssion = assertion "(" #expression ")";\
+		scutl_detail_info.file = __FILE__;\
+		scutl_detail_info.line = __LINE__;\
+		scutl_detail_reporter->assertion_started(scutl_detail_info);\
+\
+		/* Test the expression */\
+		bool scutl_detail_pass = (expression);\
 \
 		/* Report results and throw if necessary. */\
-		::scutl::detail::results_list.push_back(results);\
-		if (required && !results.pass) throw results;\
+		scutl_detail_reporter->assertion_complete(\
+			scutl_detail_info,\
+			scutl_detail_pass\
+		);\
+		if (required && !scutl_detail_pass) throw scutl_detail_info;\
 	} while(0)
 
 // Expect that the given expression is true.
 //
 //     TEST(name) {
-//         ASSERT(expression);
+//         EXPECT(expression);
 //     }
 //
-#ifdef ASSERT
-#error "Scutl wants to provide the ASSERT macro, but it's already defined!"
+#ifdef EXPECT
+#error "Scutl wants to provide the EXPECT macro, but it's already defined!"
 #endif
-#define ASSERT(expression) SCUTL_DETAIL_ASSERT((expression), "ASSERT", false)
+#define EXPECT(expression) SCUTL_DETAIL_ASSERT(expression, "EXPECT", false)
 
 // Require that the given expression is true; otherwise abort the test.
 //
@@ -180,177 +185,251 @@
 #ifdef REQUIRE
 #error "Scutl wants to provide the REQUIRE macro, but it's already defined!"
 #endif
-#define REQUIRE(expression) SCUTL_DETAIL_ASSERT((expression), "REQUIRE", true)
+#define REQUIRE(expression) SCUTL_DETAIL_ASSERT(expression, "REQUIRE", true)
+
+// Functions & classes in the public API
+namespace scutl {
+
+	// Information about a test
+	struct Test_Info {
+		std::string name;
+		std::string file;
+		size_t      line;
+	};
+
+	// Information about an assertion
+	struct Assertion_Info {
+		bool        required;
+		std::string expression;
+		std::string file;
+		size_t      line;
+	};
+
+	// Abstract interface for reporters of test results
+	struct Reporter {
+		Reporter() {}
+		virtual ~Reporter() {}
+		virtual void test_started       (const Test_Info &) = 0;
+		virtual void test_complete      (const Test_Info &) = 0;
+		virtual void assertion_started  (const Assertion_Info &) = 0;
+		virtual void assertion_complete (const Assertion_Info &, bool passed) = 0;
+	};
+
+	// Simple reporter writes test info to stdout and errors/summary to stderr
+	struct Simple_Reporter : Reporter {
+		Simple_Reporter();
+		virtual ~Simple_Reporter();
+		virtual void test_started       (const Test_Info &);
+		virtual void test_complete      (const Test_Info &);
+		virtual void assertion_started  (const Assertion_Info &);
+		virtual void assertion_complete (const Assertion_Info &, bool passed);
+
+		private:
+		size_t total_tests;
+		size_t passed_tests;
+		size_t passed_assertions_this_test;
+		size_t total_assertions_this_test;
+		size_t total_assertions;
+		size_t passed_assertions;
+	};
+
+};
 
 // This namespace is for implementation details.
 namespace scutl { namespace detail {
 
-	// Define a Test class to encapsulate our tests, and a Test_List
-	// class to hold them as they are registered.
-	struct Test;
-	typedef std::list<Test *> Test_List;
-
+	// Base class to encapsulate tests. They are auto-registered in a global
+	// list upon construction.
 	struct Test {
 		Test() { list().push_back(this); }
 		virtual ~Test() {}
-		std::string name;
-		std::string file;
-		size_t line;
-		virtual void operator()() const = 0;
-		static Test_List &list();
+		virtual void operator()(Reporter &) = 0;
+
+		// Test information
+		Test_Info info;
+
+		// Global test list
+		typedef std::list<Test *> List;
+		static List &list();
 	};
 
 	// Define an empty fixture class that's used when nothing is provided
 	// by the user.
 	struct Empty_Fixture {};
 
-	// Holds the results of an individual test assertion.
-	struct Results {
-
-		Results(
-			std::string expression,
-			std::string file,
-			size_t line,
-			bool pass
-		) : expression(expression), file(file), line(line), pass(pass) {}
-
-		Results(const Test &test, std::string expression)
-			: expression(expression), file(test.file), line(test.line), pass(false) {}
-
-		std::string expression;
-		std::string file;
-		size_t line;
-		bool pass;
-	};
-
-	// List holding all the individual results of the current test.
-	typedef std::list<Results> Results_List;
-	extern Results_List results_list;
-
 }}
 
+// If the main implementation is requested, we need to add the library
+// implementation as well.
+#ifdef SCUTL_MAIN
+#ifndef SCUTL_LIBRARY
+#define SCUTL_LIBRARY
+#endif
+#endif
+
+// Implement the scutl library when requested
 #ifdef SCUTL_LIBRARY
-#include <iostream>
 namespace scutl { namespace detail {
 
-	// Implement our test case list. We use a function to return a single
-	// instance instead of a straight global variable to avoid static
+	// Implement our list of tests. We use a function to return a single
+	// instance instead of a straight global variable to avoid static-
 	// initialization ordering issues.
-	Test_List &Test::list() {
-		static Test_List list;
+	Test::List &Test::list() {
+		static Test::List list;
 		return list;
 	}
 
-	// Implement our global test results list.
-	Results_List results_list;
+	// Helper function to run a single test with a given reporter.
+	void run_test(Test &test, Reporter &reporter) {
 
-	// Process the results list after a test has completed. Returns the number
-	// of failing assertions.
-	bool process_results_list(const Test &test) {
-		// Give details for failing tests
-		// FIXME: this just goes to stdout for now, but normally we'll
-		// FIXME: go through the a test reporter interface
-		size_t passed = 0;
-		size_t total  = 0;
-		for (
-			Results_List::iterator results_iterator = results_list.begin();
-			results_iterator != results_list.end();
-			++results_iterator
-		) {
-			Results &results = *results_iterator;
-			++total;
-			if (!results.pass) {
-				std::cout
-					<< results.file << ":"
-					<< results.line << ":"
-					<< test.name << ":"
-					<< results.expression << '\n'
-				;
-			} else {
-				++passed;
-			}
-		}
-		// Give summary
-		// FIXME: this just goes to stdout for now, but normally we'll
-		// FIXME: go through the a test reporter interface
-		std::cout
-			<< test.file << ":"
-			<< test.line << ":"
-			<< test.name << ":"
-			<< passed << " of "
-			<< total << " tests passed\n"
-		;
+		// Report the test to the reporter.
+		reporter.test_started(test.info);
 
-		// Return the number of failed assertions.
-		return total-passed;
-	}
-
-	// Helper function to run a single test. Returns the total number of
-	// failing assertions.
-	size_t run_test(const Test &test) {
+		// Run the test inside a try block. If we catch any exceptions,
+		// report them as implicit failed assertions.
 		try {
-			// Clear the global results
-			results_list.clear();
-
-			// Run the test
-			test();
-
-		// Catch exceptions that may be thrown by the test we're running, and
-		// turn them into new results if necessary.
-		} catch (const Results &) {
-			// Results received as an exception have already been added to
-			// the results list, so don't need additional handling.
-			// FIXME: but we need to note that the test was aborted so that
-			// FIXME: we don't give the wrong impression about the number of
-			// FIXME: total tests that exist in our summary.
+			test(reporter);
+		} catch (const Assertion_Info &) {
+			// If an Assertion_Info is received as an exception, we know it
+			// has already been reported before being thrown, so additional
+			// handling is unnecessary here.
 		} catch (const std::exception &e) {
-			results_list.push_back(Results(test, "caught std::exception"));
-		} catch (const std::string &e) {
-			results_list.push_back(Results(test, "caught std::string"));
+			Assertion_Info info;
+			info.required = true;
+			info.expression = std::string("unexpected exception: ") + e.what();
+			info.file = test.info.file;
+			info.line = test.info.line;
+			reporter.assertion_started(info);
+			reporter.assertion_complete(info, false);
 		} catch (...) {
-			results_list.push_back(Results(test, "caught unknown exception"));
+			Assertion_Info info;
+			info.required = true;
+			info.expression = "unknown exception";
+			info.file = test.info.file;
+			info.line = test.info.line;
+			reporter.assertion_started(info);
+			reporter.assertion_complete(info, false);
 		}
 
-		// After running a test, process all of it's results.
-		return process_results_list(test);
+		// Report the test completion
+		reporter.test_complete(test.info);
 	}
 }}
 
 namespace scutl {
 
 	// The scutl entry point, which can be called by the user when ready to
-	// run all the registered tests.
-	int main() {
-		scutl::detail::Test_List &test_list = scutl::detail::Test::list();
-		size_t passed = 0;
-		size_t total = 0;
+	// run all the registered tests against the given reporter.
+	void run(Reporter &reporter) {
+		scutl::detail::Test::List &test_list = scutl::detail::Test::list();
 		for (
-			scutl::detail::Test_List::iterator test_iterator = test_list.begin();
+			scutl::detail::Test::List::iterator test_iterator = test_list.begin();
 			test_iterator != test_list.end();
 			++test_iterator
 		) {
 			scutl::detail::Test &test = **test_iterator;
-			++total;
-			passed += scutl::detail::run_test(test);
+			scutl::detail::run_test(test, reporter);
+		}
+	}
+
+	Simple_Reporter::Simple_Reporter() {
+		std::cout << "Starting test suite ...\n";
+		passed_tests = 0;
+		total_tests = 0;
+		passed_assertions = 0;
+		total_assertions = 0;
+		passed_assertions_this_test = 0;
+		total_assertions_this_test = 0;
+	}
+
+	Simple_Reporter::~Simple_Reporter() {
+		std::cout << "Test suite complete\n";
+
+		std::cerr
+			<< passed_tests << " of "
+			<< total_tests << " passed tests.\n"
+		;
+		if (passed_tests == total_tests) {
+			std::cerr << "ALL TESTS PASSED!\n";
+		} else {
+			std::cerr
+				<< (total_tests-passed_tests)
+				<< " TESTS FAILED!\n";
 		}
 
-		// Give summary of total tests passed or failed.
-		// FIXME: this just goes to stdout for now, but normally we'll
-		// FIXME: go through the a test reporter interface
-		std::cout
-			<< passed << " of "
-			<< total << " tests passed\n"
+		std::cerr
+			<< passed_assertions << " of "
+			<< total_assertions << " passed assertions.\n"
 		;
+			if (passed_assertions == total_assertions) {
+				std::cerr << "ALL ASSERTIONS PASSED!\n";
+			} else {
+			std::cerr
+				<< (total_assertions-passed_assertions)
+				<< " ASSERTIONS FAILED!\n";
+			}
 
-		// Our return code is the number of failing tests.
-		return total-passed;
 	}
+
+	void Simple_Reporter::test_started (const Test_Info &info) {
+		std::cout
+			<< info.file << ":"
+			<< info.line << ":"
+			<< info.name << ": starting\n";
+		;
+		++total_tests;
+		passed_assertions_this_test = 0;
+		total_assertions_this_test = 0;
+	}
+
+	void Simple_Reporter::test_complete (const Test_Info &info) {
+		std::cout
+			<< info.file << ":"
+			<< info.line << ":"
+			<< info.name << ": complete\n"
+		;
+		if (
+			(passed_assertions_this_test > 0) &&
+			(passed_assertions_this_test == total_assertions_this_test)
+		) {
+			++passed_tests;
+			passed_assertions_this_test = 0;
+			total_assertions_this_test = 0;
+		}
+	}
+
+	void Simple_Reporter::assertion_started (const Assertion_Info &info) {
+		std::cout
+			<< info.file << ":"
+			<< info.line << ":"
+			<< info.expression << ": starting\n"
+		;
+		++total_assertions_this_test;
+		++total_assertions;
+	}
+
+	void Simple_Reporter::assertion_complete (const Assertion_Info &info, bool passed) {
+		if (passed) {
+			++passed_assertions_this_test;
+			++passed_assertions;
+		} else {
+			std::cerr
+				<< info.file << ":"
+				<< info.line << ":"
+				<< info.expression << ": FAIL\n"
+			;
+		}
+	}
+
 }
 #endif
 
+// Implement the main function when requested.
 #ifdef SCUTL_MAIN
 int main() {
-	return scutl::main();
+	scutl::Simple_Reporter reporter;
+	scutl::run(reporter);
+	return 0;
 }
 #endif
 

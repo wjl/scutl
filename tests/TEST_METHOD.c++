@@ -41,10 +41,10 @@ namespace Increment_Decrement {
 	}
 
 	TEST_METHOD(Fixture, decrement) {
-		ASSERT(x == 10);
-		ASSERT(--x == 9);
-		ASSERT(x == 9);
-		ASSERT(x-- == 9);
-		ASSERT(x == 8);
+		EXPECT(x == 10);
+		EXPECT(--x == 9);
+		EXPECT(x == 9);
+		EXPECT(x-- == 9);
+		EXPECT(x == 8);
 	}
 }

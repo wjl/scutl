@@ -2,25 +2,25 @@
 #include <stdexcept>
 
 TEST(no_exception) {
-	ASSERT(true);
+	EXPECT(true);
 }
 
 TEST(runtime_error) {
 	throw std::runtime_error("runtime error occured");
-	ASSERT(true);
+	EXPECT(true);
 }
 
 TEST(string_error) {
 	throw std::string("string error occured");
-	ASSERT(true);
+	EXPECT(true);
 }
 
 TEST(c_string_error) {
 	throw "C string error occured";
-	ASSERT(true);
+	EXPECT(true);
 }
 
 TEST(unknown_exception) {
 	throw 0;
-	ASSERT(true);
+	EXPECT(true);
 }
