@@ -53,11 +53,8 @@
 #ifndef SCUTL__header__
 #define SCUTL__header__
 
-// TODO: handle uncatchable exceptions (e.g. unexpected()? what else is helpful?)
-// TODO: work with valgrind
-// TODO: TAP output reporter for use with prove
-// TODO: assertions for expecting/not-expecting exceptions
 // TODO: polish documentation
+// TODO: add tests for TAP reporter
 
 // Required standard library headers
 #include <iomanip>
@@ -225,6 +222,20 @@ namespace scutl {
 		virtual void report_test_complete(const Test_Info &);
 		virtual void report_test_error   (const Test_Info &, const Error_Info &);
 		virtual void report_test_summary (const Test_Statistics &);
+	};
+
+	// TAP reporter writes Test Anything Protocol format to stdout
+	struct TAP_Reporter : Reporter {
+		TAP_Reporter();
+		virtual ~TAP_Reporter();
+		virtual void report_test_count   (size_t);
+		virtual void report_test_started (const Test_Info &);
+		virtual void report_test_complete(const Test_Info &);
+		virtual void report_test_error   (const Test_Info &, const Error_Info &);
+		virtual void report_test_summary (const Test_Statistics &);
+		private:
+		size_t number;
+		bool ok;
 	};
 
 };
@@ -426,13 +437,58 @@ namespace scutl {
 		std::cerr << ss.str();
 	}
 
+	TAP_Reporter::TAP_Reporter() {
+		std::cout << "TAP version 13\n";
+		number = 0;
+		ok = false;
+	}
+
+	TAP_Reporter::~TAP_Reporter() {}
+
+	void TAP_Reporter::report_test_count(size_t count) {
+		std::cout << "1.." << count << "\n";
+	}
+
+	void TAP_Reporter::report_test_started(const Test_Info &) {
+		++number;
+		ok = true;
+	}
+
+	void TAP_Reporter::report_test_complete(const Test_Info &test_info) {
+		std::cout
+			<< (ok ? "ok " : "not ok ")
+			<< number << " - "
+			<< test_info.name << ":"
+			<< test_info.file << ":"
+			<< test_info.line << "\n"
+		;
+	}
+
+	void TAP_Reporter::report_test_error(const Test_Info &test_info, const Error_Info &error_info) {
+		ok = false;
+		std::cout
+			<< error_info.file << ":"
+			<< error_info.line << ":"
+			<< test_info.name << ": ERROR: "
+			<< error_info.expression << "\n"
+		;
+	}
+
+	void TAP_Reporter::report_test_summary(const Test_Statistics &) {}
+
 }
 #endif
 
 // Implement the main function when requested.
 #ifdef SCUTL_MAIN
+
+// Define SCUTL_REPORTER if the user has not done so.
+#ifndef SCUTL_REPORTER
+#define SCUTL_REPORTER scutl::Simple_Reporter
+#endif
+
 int main() {
-	scutl::Simple_Reporter reporter;
+	SCUTL_REPORTER reporter;
 	scutl::run(reporter);
 	return 0;
 }
