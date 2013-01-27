@@ -62,8 +62,10 @@
 // TODO: assertions for expecting/not-expecting exceptions
 
 // Required standard library headers
+#include <iomanip>
 #include <iostream>
 #include <list>
+#include <sstream>
 #include <string>
 
 // Helper macros for concatenation & stringification.
@@ -103,9 +105,11 @@
 	/* Define our Test class */\
 	struct Test : ::scutl::detail::Test {\
 		Test() {\
-			info.na##me = #name;\
-			info.file = __FILE__;\
-			info.line = __LINE__;\
+			info.na##me  = #name;\
+			info.file    = __FILE__;\
+			info.line    = __LINE__;\
+			info.passed  = true;\
+			info.aborted = true;\
 		}\
 		virtual void operator()() {\
 			function();\
@@ -127,28 +131,29 @@
 // Helper macro for impementing assertions.
 #define SCUTL_DETAIL_ASSERT(expression, assertion, required)\
 \
-	/* Wrap in do/while to give an anonymous scope. */\
+	/* Wrap in do/while to give a statement-like interface. */\
 	do {\
-		/* Until we have evaluated the expression, we have to use fully\
-		 * qualified variable names */\
+		/* If there was failure report results and throw if necessary. */\
+		if (!(expression)) {\
+			/* Collect information about the assertion. */\
+			::scutl::Error_Info error_info;\
+			error_info.expre##ssion = assertion "(" #expression ")";\
+			error_info.file = __FILE__;\
+			error_info.line = __LINE__;\
 \
-		/* Collect information about the assertion. */\
-		::scutl::Assertion_Info scutl_detail_info;\
-		scutl_detail_info.requ##ired = required;\
-		scutl_detail_info.expre##ssion = assertion "(" #expression ")";\
-		scutl_detail_info.file = __FILE__;\
-		scutl_detail_info.line = __LINE__;\
-		::scutl::detail::global.reporter->assertion_started(scutl_detail_info);\
+			/* Mark current test as not passed */\
+			::scutl::detail::global.test->info.passed = false;\
 \
-		/* Test the expression */\
-		bool scutl_detail_pass = (expression);\
-\
-		/* Report results and throw if necessary. */\
-		::scutl::detail::global.reporter->assertion_complete(\
-			scutl_detail_info,\
-			scutl_detail_pass\
-		);\
-		if (required && !scutl_detail_pass) throw scutl_detail_info;\
+			/* Report results and throw if necessary. */\
+			::scutl::detail::global.reporter->report_test_error(\
+				::scutl::detail::global.test->info,\
+				error_info\
+			);\
+			if (required) {\
+				::scutl::detail::global.test->info.aborted = true;\
+				throw error_info;\
+			}\
+		}\
 	} while(0)
 
 // Expect that the given expression is true.
@@ -181,42 +186,47 @@ namespace scutl {
 		std::string name;
 		std::string file;
 		size_t      line;
+		bool        passed;
+		bool        aborted;
 	};
 
-	// Information about an assertion
-	struct Assertion_Info {
-		bool        required;
+	// Information about a failing assertion
+	struct Error_Info {
 		std::string expression;
 		std::string file;
 		size_t      line;
 	};
 
-	// Abstract interface for reporters of test results
+	// Statistics collected during test runnning
+	struct Test_Statistics {
+		size_t count;
+		size_t started;
+		size_t complete;
+		size_t passed;
+		size_t failed;
+		size_t aborted;
+	};
+
+	// Interface for reporters of test results
 	struct Reporter {
 		Reporter() {}
 		virtual ~Reporter() {}
-		virtual void test_started       (const Test_Info &) = 0;
-		virtual void test_complete      (const Test_Info &) = 0;
-		virtual void assertion_started  (const Assertion_Info &) = 0;
-		virtual void assertion_complete (const Assertion_Info &, bool passed) = 0;
+		virtual void report_test_count   (size_t) = 0;
+		virtual void report_test_started (const Test_Info &) = 0;
+		virtual void report_test_complete(const Test_Info &) = 0;
+		virtual void report_test_error   (const Test_Info &, const Error_Info &) = 0;
+		virtual void report_test_summary (const Test_Statistics &) = 0;
 	};
 
-	// Simple reporter writes test info to stdout and errors/summary to stderr
+	// Simple reporter writes complete test log to stdout and errors/summary to stderr
 	struct Simple_Reporter : Reporter {
 		Simple_Reporter();
 		virtual ~Simple_Reporter();
-		virtual void test_started       (const Test_Info &);
-		virtual void test_complete      (const Test_Info &);
-		virtual void assertion_started  (const Assertion_Info &);
-		virtual void assertion_complete (const Assertion_Info &, bool passed);
-
-		private:
-		size_t total_tests;
-		size_t passed_tests;
-		size_t passed_assertions_this_test;
-		size_t total_assertions_this_test;
-		size_t total_assertions;
-		size_t passed_assertions;
+		virtual void report_test_count   (size_t);
+		virtual void report_test_started (const Test_Info &);
+		virtual void report_test_complete(const Test_Info &);
+		virtual void report_test_error   (const Test_Info &, const Error_Info &);
+		virtual void report_test_summary (const Test_Statistics &);
 	};
 
 };
@@ -276,43 +286,46 @@ namespace scutl { namespace detail {
 	Global global;
 
 	// Helper function to run a single test with a given reporter.
-	void run_test(Test &test, Reporter &reporter) {
-
-		// Report the test to the reporter.
-		reporter.test_started(test.info);
+	void run_test(Test &test, Reporter &reporter, Test_Statistics &statistics) {
 
 		// Set the global test and reporter pointers for use by assertions.
 		global.test     = &test;
 		global.reporter = &reporter;
 
+		// Report the test to the reporter.
+		reporter.report_test_started(test.info);
+		++statistics.started;
+
 		// Run the test inside a try block. If we catch any exceptions,
 		// report them as implicit failed assertions.
 		try {
 			test();
-		} catch (const Assertion_Info &) {
-			// If an Assertion_Info is received as an exception, we know it
+			// By default test assume they will be aborted. If we don't get
+			// an exception, then we can be assured that didn't happen.
+			test.info.aborted = false;
+		} catch (const Error_Info &) {
+			// If an Error_Info is received as an exception, we know it
 			// has already been reported before being thrown, so additional
 			// handling is unnecessary here.
 		} catch (const std::exception &e) {
-			Assertion_Info info;
-			info.required = true;
-			info.expression = std::string("unexpected exception: ") + e.what();
-			info.file = test.info.file;
-			info.line = test.info.line;
-			reporter.assertion_started(info);
-			reporter.assertion_complete(info, false);
+			Error_Info error_info;
+			error_info.expression = std::string("unexpected exception: ") + e.what();
+			error_info.file = test.info.file;
+			error_info.line = test.info.line;
+			reporter.report_test_error(test.info, error_info);
 		} catch (...) {
-			Assertion_Info info;
-			info.required = true;
-			info.expression = "unknown exception";
-			info.file = test.info.file;
-			info.line = test.info.line;
-			reporter.assertion_started(info);
-			reporter.assertion_complete(info, false);
+			Error_Info error_info;
+			error_info.expression = "unknown exception";
+			error_info.file = test.info.file;
+			error_info.line = test.info.line;
+			reporter.report_test_error(test.info, error_info);
 		}
 
 		// Report the test completion
-		reporter.test_complete(test.info);
+		reporter.report_test_complete(test.info);
+		++statistics.complete;
+		if (test.info.passed)  ++statistics.passed; else ++statistics.failed;
+		if (test.info.aborted) ++statistics.aborted;
 	}
 }}
 
@@ -321,104 +334,98 @@ namespace scutl {
 	// The scutl entry point, which can be called by the user when ready to
 	// run all the registered tests against the given reporter.
 	void run(Reporter &reporter) {
+
+		// Zero out statistics we will be collecting while running
+		Test_Statistics statistics;
+		statistics.count    = 0;
+		statistics.started  = 0;
+		statistics.complete = 0;
+		statistics.passed   = 0;
+		statistics.failed   = 0;
+		statistics.aborted  = 0;
+
+		// Grab a reference to our test list
 		scutl::detail::Test::List &test_list = scutl::detail::Test::list();
+
+		// Inform the reporter of how many tests we are going to run.
+		statistics.count = test_list.size();
+		reporter.report_test_count(statistics.count);
+
+		// Run each test with the given reporter.
 		for (
 			scutl::detail::Test::List::iterator test_iterator = test_list.begin();
 			test_iterator != test_list.end();
 			++test_iterator
 		) {
 			scutl::detail::Test &test = **test_iterator;
-			scutl::detail::run_test(test, reporter);
-		}
-	}
-
-	Simple_Reporter::Simple_Reporter() {
-		std::cout << "Starting test suite ...\n";
-		passed_tests = 0;
-		total_tests = 0;
-		passed_assertions = 0;
-		total_assertions = 0;
-		passed_assertions_this_test = 0;
-		total_assertions_this_test = 0;
-	}
-
-	Simple_Reporter::~Simple_Reporter() {
-		std::cout << "Test suite complete\n";
-
-		std::cerr
-			<< passed_tests << " of "
-			<< total_tests << " passed tests.\n"
-		;
-		if (passed_tests == total_tests) {
-			std::cerr << "ALL TESTS PASSED!\n";
-		} else {
-			std::cerr
-				<< (total_tests-passed_tests)
-				<< " TESTS FAILED!\n";
+			scutl::detail::run_test(test, reporter, statistics);
 		}
 
-		std::cerr
-			<< passed_assertions << " of "
-			<< total_assertions << " passed assertions.\n"
-		;
-			if (passed_assertions == total_assertions) {
-				std::cerr << "ALL ASSERTIONS PASSED!\n";
-			} else {
-			std::cerr
-				<< (total_assertions-passed_assertions)
-				<< " ASSERTIONS FAILED!\n";
-			}
-
+		// Report the final summary
+		reporter.report_test_summary(statistics);
 	}
 
-	void Simple_Reporter::test_started (const Test_Info &info) {
+	Simple_Reporter::Simple_Reporter() {}
+
+	Simple_Reporter::~Simple_Reporter() {}
+
+	void Simple_Reporter::report_test_count(size_t count) {
+		std::cout << "scutl: Running " << count << " tests ...\n";
+	}
+
+	void Simple_Reporter::report_test_started(const Test_Info &test_info) {
 		std::cout
-			<< info.file << ":"
-			<< info.line << ":"
-			<< info.name << ": starting\n";
+			<< "scutl: "
+			<< test_info.file << ":"
+			<< test_info.line << ":"
+			<< test_info.name << ": starting\n";
 		;
-		++total_tests;
-		passed_assertions_this_test = 0;
-		total_assertions_this_test = 0;
 	}
 
-	void Simple_Reporter::test_complete (const Test_Info &info) {
+	void Simple_Reporter::report_test_complete(const Test_Info &test_info) {
 		std::cout
-			<< info.file << ":"
-			<< info.line << ":"
-			<< info.name << ": complete\n"
+			<< "scutl: "
+			<< test_info.file << ":"
+			<< test_info.line << ":"
+			<< test_info.name << ": completed\n"
 		;
-		if (
-			(passed_assertions_this_test > 0) &&
-			(passed_assertions_this_test == total_assertions_this_test)
-		) {
-			++passed_tests;
-			passed_assertions_this_test = 0;
-			total_assertions_this_test = 0;
-		}
 	}
 
-	void Simple_Reporter::assertion_started (const Assertion_Info &info) {
-		std::cout
-			<< info.file << ":"
-			<< info.line << ":"
-			<< info.expression << ": starting\n"
+	void Simple_Reporter::report_test_error(const Test_Info &test_info, const Error_Info &error_info) {
+		std::ostringstream ss;
+		ss
+			<< "scutl: "
+			<< error_info.file << ":"
+			<< error_info.line << ":"
+			<< test_info.name << ": ERROR: "
+			<< error_info.expression << "\n"
 		;
-		++total_assertions_this_test;
-		++total_assertions;
+		std::cout << ss.str();
+		std::cerr << ss.str();
 	}
 
-	void Simple_Reporter::assertion_complete (const Assertion_Info &info, bool passed) {
-		if (passed) {
-			++passed_assertions_this_test;
-			++passed_assertions;
-		} else {
-			std::cerr
-				<< info.file << ":"
-				<< info.line << ":"
-				<< info.expression << ": FAIL\n"
-			;
-		}
+	void Simple_Reporter::report_test_summary(const Test_Statistics &statistics) {
+		std::ostringstream ss;
+		ss
+			<< "scutl: SUMMARY: |"
+			<< "count   " << "|"
+			<< "started " << "|"
+			<< "complete" << "|"
+			<< "passed  " << "|"
+			<< "failed  " << "|"
+			<< "aborted " << "|"
+			<< "\n"
+			<< "scutl: SUMMARY: |"
+			<< std::setw(8) << statistics.count    << "|"
+			<< std::setw(8) << statistics.started  << "|"
+			<< std::setw(8) << statistics.complete << "|"
+			<< std::setw(8) << statistics.passed   << "|"
+			<< std::setw(8) << statistics.failed   << "|"
+			<< std::setw(8) << statistics.aborted  << "|"
+			<< "\n"
+		;
+		std::cout << ss.str();
+		std::cerr << ss.str();
 	}
 
 }
