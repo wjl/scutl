@@ -26,3 +26,12 @@ TEST(one_plus_one_failing) {
 	REQUIRE(x+x == 3);
 	REQUIRE(1+1 == 2);
 }
+
+void function_calling_require(int x) {
+	REQUIRE(x == 1);
+}
+
+TEST(call_require_from_a_function) {
+	int x = 1;
+	function_calling_require(x);
+}

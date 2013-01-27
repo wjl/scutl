@@ -1,1 +1,3 @@
 tests/run
+tests/log.stdout
+tests/log.stderr

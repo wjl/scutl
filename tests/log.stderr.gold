@@ -1,0 +1,18 @@
+Expect an exception with "runtime error occured"
+scutl: tests/exceptions.c++:8:runtime_error: ERROR: unexpected exception: runtime error occured
+Expect an unknown exception
+scutl: tests/exceptions.c++:14:unknown_exception: ERROR: unknown exception
+Expect an EXPECT(false) error
+scutl: tests/EXPECT.c++:6:EXPECT_true_then_false: ERROR: EXPECT(false)
+Expect an EXPECT(false) error
+scutl: tests/EXPECT.c++:11:EXPECT_false_then_true: ERROR: EXPECT(false)
+Expect an EXPECT(x+x == 3) error
+scutl: tests/EXPECT.c++:26:one_plus_one_failing: ERROR: EXPECT(x+x == 3)
+Expect a REQUIRE(false) error
+scutl: tests/REQUIRE.c++:6:REQUIRE_true_then_false: ERROR: REQUIRE(false)
+Expect a REQUIRE(false) error
+scutl: tests/REQUIRE.c++:11:REQUIRE_false_then_true: ERROR: REQUIRE(false)
+Expect a REQUIRE(x+x == 3) error
+scutl: tests/REQUIRE.c++:26:one_plus_one_failing: ERROR: REQUIRE(x+x == 3)
+scutl: SUMMARY: |count   |started |complete|passed  |failed  |aborted |
+scutl: SUMMARY: |      31|      31|      31|      25|       6|       5|

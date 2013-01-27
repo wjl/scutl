@@ -28,7 +28,7 @@ TEST(one_plus_one_failing) {
 }
 
 void function_calling_expect(int x) {
-	EXPECT( x  == 1);
+	EXPECT(x == 1);
 }
 
 TEST(call_expect_from_a_function) {
