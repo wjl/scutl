@@ -57,6 +57,7 @@
 // TODO: work with valgrind
 // TODO: TAP output reporter for use with prove
 // TODO: assertions for expecting/not-expecting exceptions
+// TODO: polish documentation
 
 // Required standard library headers
 #include <iomanip>
