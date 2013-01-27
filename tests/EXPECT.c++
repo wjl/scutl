@@ -23,3 +23,14 @@ TEST(one_plus_one_failing) {
 	EXPECT(x+x == 3);
 	EXPECT(1+1 == 2);
 }
+
+void function_calling_expect(int x) {
+	EXPECT( x  == 1);
+	EXPECT(x+x == 3);
+	EXPECT(1+1 == 2);
+}
+
+TEST(call_expect_from_a_function) {
+	int x = 1;
+	function_calling_expect(x);
+}

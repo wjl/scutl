@@ -53,24 +53,12 @@
 #ifndef SCUTL__header__
 #define SCUTL__header__
 
-// TODO: look at crpcut for other features
-// TODO: implement INFO stream like crpcut (probably just stdout)
-// TODO: run tests in separate directory and process like crpcut
-// TODO: handle uncatchable exceptions (e.g. unexpected())
-// TODO: handle exit/abort and assertions from <cassert>
-// TODO: handle crashes
-// TODO: handle signals -- see posix/SignalTranslator.h and crpcut
-// TODO: handle infinite loops (timeouts)
-// TODO: handle memory hogging
-// TODO: handle forkbombs
+// TODO: handle uncatchable exceptions (e.g. unexpected()? what else is helpful?)
 // TODO: work with valgrind
-// TODO: generic output API ("Test Reporter")
-// TODO: report stream activity (stdout, stderr)
-// TODO: TAP output for use with prove
-// TODO: thread safety: EXPECT/REQUIRE using test class members instead of global variables?
-// TODO: multithreaded test running
-// TODO: automatic timing
-// TODO: run or exclude specific tests or suites
+// TODO: prefix output "SCUTL: " to distinguish from other stream activity (stdout, stderr)
+// TODO: generic output API refinement
+// TODO: TAP output reporter for use with prove
+// TODO: auto timing & summarizing in reporter base class
 // TODO: assertions for expecting/not-expecting exceptions
 
 // Required standard library headers
@@ -109,7 +97,6 @@
 	 * fixture class. This is done separately from the Test object to ensure\
 	 * that the user's test function does not have a polluted namespace. */\
 	struct Function : fixture {\
-		::scutl::Reporter *scutl_detail_reporter;\
 		void operator()();\
 	};\
 \
@@ -120,8 +107,7 @@
 			info.file = __FILE__;\
 			info.line = __LINE__;\
 		}\
-		virtual void operator()(::scutl::Reporter &reporter) {\
-			function.scutl_detail_reporter = &reporter;\
+		virtual void operator()() {\
 			function();\
 		};\
 		Function function;\
@@ -152,13 +138,13 @@
 		scutl_detail_info.expre##ssion = assertion "(" #expression ")";\
 		scutl_detail_info.file = __FILE__;\
 		scutl_detail_info.line = __LINE__;\
-		scutl_detail_reporter->assertion_started(scutl_detail_info);\
+		::scutl::detail::global.reporter->assertion_started(scutl_detail_info);\
 \
 		/* Test the expression */\
 		bool scutl_detail_pass = (expression);\
 \
 		/* Report results and throw if necessary. */\
-		scutl_detail_reporter->assertion_complete(\
+		::scutl::detail::global.reporter->assertion_complete(\
 			scutl_detail_info,\
 			scutl_detail_pass\
 		);\
@@ -243,7 +229,7 @@ namespace scutl { namespace detail {
 	struct Test {
 		Test() { list().push_back(this); }
 		virtual ~Test() {}
-		virtual void operator()(Reporter &) = 0;
+		virtual void operator()() = 0;
 
 		// Test information
 		Test_Info info;
@@ -256,6 +242,13 @@ namespace scutl { namespace detail {
 	// Define an empty fixture class that's used when nothing is provided
 	// by the user.
 	struct Empty_Fixture {};
+
+	// Global pointers set by the test runner and use by assertions
+	struct Global {
+		Test     *test;
+		Reporter *reporter;
+	};
+	extern Global global;
 
 }}
 
@@ -279,16 +272,23 @@ namespace scutl { namespace detail {
 		return list;
 	}
 
+	// Implement our global structure used to by the runner and assertions.
+	Global global;
+
 	// Helper function to run a single test with a given reporter.
 	void run_test(Test &test, Reporter &reporter) {
 
 		// Report the test to the reporter.
 		reporter.test_started(test.info);
 
+		// Set the global test and reporter pointers for use by assertions.
+		global.test     = &test;
+		global.reporter = &reporter;
+
 		// Run the test inside a try block. If we catch any exceptions,
 		// report them as implicit failed assertions.
 		try {
-			test(reporter);
+			test();
 		} catch (const Assertion_Info &) {
 			// If an Assertion_Info is received as an exception, we know it
 			// has already been reported before being thrown, so additional
