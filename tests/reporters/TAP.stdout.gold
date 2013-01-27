@@ -1,0 +1,41 @@
+TAP version 13
+1..31
+ok 1 - no_exception:tests/exceptions.c++:4
+tests/exceptions.c++:8:runtime_error: ERROR: unexpected exception: runtime error occured
+not ok 2 - runtime_error:tests/exceptions.c++:8
+tests/exceptions.c++:14:unknown_exception: ERROR: unknown exception
+not ok 3 - unknown_exception:tests/exceptions.c++:14
+tests/EXPECT.c++:6:EXPECT_true_then_false: ERROR: EXPECT(false)
+not ok 4 - EXPECT_true_then_false:tests/EXPECT.c++:3
+tests/EXPECT.c++:11:EXPECT_false_then_true: ERROR: EXPECT(false)
+not ok 5 - EXPECT_false_then_true:tests/EXPECT.c++:9
+ok 6 - one_plus_one_passing:tests/EXPECT.c++:15
+tests/EXPECT.c++:26:one_plus_one_failing: ERROR: EXPECT(x+x == 3)
+not ok 7 - one_plus_one_failing:tests/EXPECT.c++:22
+ok 8 - call_expect_from_a_function:tests/EXPECT.c++:34
+tests/REQUIRE.c++:6:REQUIRE_true_then_false: ERROR: REQUIRE(false)
+not ok 9 - REQUIRE_true_then_false:tests/REQUIRE.c++:3
+tests/REQUIRE.c++:11:REQUIRE_false_then_true: ERROR: REQUIRE(false)
+not ok 10 - REQUIRE_false_then_true:tests/REQUIRE.c++:9
+ok 11 - one_plus_one_passing:tests/REQUIRE.c++:15
+tests/REQUIRE.c++:26:one_plus_one_failing: ERROR: REQUIRE(x+x == 3)
+not ok 12 - one_plus_one_failing:tests/REQUIRE.c++:22
+ok 13 - call_require_from_a_function:tests/REQUIRE.c++:34
+ok 14 - TEST_works:tests/TEST.c++:3
+ok 15 - duplicate_test_names_are_ok:tests/TEST.c++:5
+ok 16 - duplicate_test_names_are_ok:tests/TEST.c++:6
+ok 17 - duplicate_test_names_are_ok:tests/TEST.c++:7
+ok 18 - TEST_works_in_an_arbitrary_namespace:tests/TEST.c++:10
+ok 19 - TEST_METHOD_works:tests/TEST_METHOD.c++:5
+ok 20 - TEST_METHOD_duplicate_test_names_are_ok:tests/TEST_METHOD.c++:7
+ok 21 - TEST_METHOD_duplicate_test_names_are_ok:tests/TEST_METHOD.c++:8
+ok 22 - TEST_METHOD_duplicate_test_names_are_ok:tests/TEST_METHOD.c++:9
+ok 23 - TEST_METHOD_works_in_an_arbitrary_namespace:tests/TEST_METHOD.c++:12
+ok 24 - fixture_is_unmodified:tests/TEST_METHOD.c++:21
+ok 25 - fixture_is_unmodified:tests/TEST_METHOD.c++:22
+ok 26 - fixture_is_unmodified:tests/TEST_METHOD.c++:23
+ok 27 - fixture_is_unmodified:tests/TEST_METHOD.c++:24
+ok 28 - fixture_is_unmodified:tests/TEST_METHOD.c++:25
+ok 29 - fixture_is_unmodified:tests/TEST_METHOD.c++:26
+ok 30 - increment:tests/TEST_METHOD.c++:35
+ok 31 - decrement:tests/TEST_METHOD.c++:43

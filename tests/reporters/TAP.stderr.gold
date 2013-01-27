@@ -1,0 +1,8 @@
+Expect an exception with "runtime error occured"
+Expect an unknown exception
+Expect an EXPECT(false) error
+Expect an EXPECT(false) error
+Expect an EXPECT(x+x == 3) error
+Expect a REQUIRE(false) error
+Expect a REQUIRE(false) error
+Expect a REQUIRE(x+x == 3) error

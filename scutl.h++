@@ -54,7 +54,6 @@
 #define SCUTL__header__
 
 // TODO: polish documentation
-// TODO: add tests for TAP reporter
 
 // Required standard library headers
 #include <iomanip>
@@ -213,10 +212,10 @@ namespace scutl {
 		virtual void report_test_summary (const Test_Statistics &) = 0;
 	};
 
-	// Simple reporter writes complete test log to stdout and errors/summary to stderr
-	struct Simple_Reporter : Reporter {
-		Simple_Reporter();
-		virtual ~Simple_Reporter();
+	// Default reporter writes complete test log to stdout and errors/summary to stderr
+	struct Default_Reporter : Reporter {
+		Default_Reporter();
+		virtual ~Default_Reporter();
 		virtual void report_test_count   (size_t);
 		virtual void report_test_started (const Test_Info &);
 		virtual void report_test_complete(const Test_Info &);
@@ -374,15 +373,15 @@ namespace scutl {
 		reporter.report_test_summary(statistics);
 	}
 
-	Simple_Reporter::Simple_Reporter() {}
+	Default_Reporter::Default_Reporter() {}
 
-	Simple_Reporter::~Simple_Reporter() {}
+	Default_Reporter::~Default_Reporter() {}
 
-	void Simple_Reporter::report_test_count(size_t count) {
+	void Default_Reporter::report_test_count(size_t count) {
 		std::cout << "scutl: Running " << count << " tests ...\n";
 	}
 
-	void Simple_Reporter::report_test_started(const Test_Info &test_info) {
+	void Default_Reporter::report_test_started(const Test_Info &test_info) {
 		std::cout
 			<< "scutl: "
 			<< test_info.file << ":"
@@ -391,7 +390,7 @@ namespace scutl {
 		;
 	}
 
-	void Simple_Reporter::report_test_complete(const Test_Info &test_info) {
+	void Default_Reporter::report_test_complete(const Test_Info &test_info) {
 		std::cout
 			<< "scutl: "
 			<< test_info.file << ":"
@@ -400,7 +399,7 @@ namespace scutl {
 		;
 	}
 
-	void Simple_Reporter::report_test_error(const Test_Info &test_info, const Error_Info &error_info) {
+	void Default_Reporter::report_test_error(const Test_Info &test_info, const Error_Info &error_info) {
 		std::ostringstream ss;
 		ss
 			<< "scutl: "
@@ -413,7 +412,7 @@ namespace scutl {
 		std::cerr << ss.str();
 	}
 
-	void Simple_Reporter::report_test_summary(const Test_Statistics &statistics) {
+	void Default_Reporter::report_test_summary(const Test_Statistics &statistics) {
 		std::ostringstream ss;
 		ss
 			<< "scutl: SUMMARY: |"
@@ -484,7 +483,7 @@ namespace scutl {
 
 // Define SCUTL_REPORTER if the user has not done so.
 #ifndef SCUTL_REPORTER
-#define SCUTL_REPORTER scutl::Simple_Reporter
+#define SCUTL_REPORTER scutl::Default_Reporter
 #endif
 
 int main() {
