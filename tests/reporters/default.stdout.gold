@@ -1,12 +1,4 @@
 scutl: Running 31 tests ...
-scutl: tests/exceptions.c++:4:no_exception: starting
-scutl: tests/exceptions.c++:4:no_exception: completed
-scutl: tests/exceptions.c++:8:runtime_error: starting
-scutl: tests/exceptions.c++:8:runtime_error: ERROR: unexpected exception: runtime error occured
-scutl: tests/exceptions.c++:8:runtime_error: completed
-scutl: tests/exceptions.c++:14:unknown_exception: starting
-scutl: tests/exceptions.c++:14:unknown_exception: ERROR: unknown exception
-scutl: tests/exceptions.c++:14:unknown_exception: completed
 scutl: tests/EXPECT.c++:3:EXPECT_true_then_false: starting
 scutl: tests/EXPECT.c++:6:EXPECT_true_then_false: ERROR: EXPECT(false)
 scutl: tests/EXPECT.c++:3:EXPECT_true_then_false: completed
@@ -69,5 +61,13 @@ scutl: tests/TEST_METHOD.c++:35:increment: starting
 scutl: tests/TEST_METHOD.c++:35:increment: completed
 scutl: tests/TEST_METHOD.c++:43:decrement: starting
 scutl: tests/TEST_METHOD.c++:43:decrement: completed
+scutl: tests/exceptions.c++:4:no_exception: starting
+scutl: tests/exceptions.c++:4:no_exception: completed
+scutl: tests/exceptions.c++:8:runtime_error: starting
+scutl: tests/exceptions.c++:8:runtime_error: ERROR: unexpected exception: runtime error occured
+scutl: tests/exceptions.c++:8:runtime_error: completed
+scutl: tests/exceptions.c++:14:unknown_exception: starting
+scutl: tests/exceptions.c++:14:unknown_exception: ERROR: unknown exception
+scutl: tests/exceptions.c++:14:unknown_exception: completed
 scutl: SUMMARY: |count   |started |complete|passed  |failed  |aborted |
 scutl: SUMMARY: |      31|      31|      31|      25|       6|       5|
