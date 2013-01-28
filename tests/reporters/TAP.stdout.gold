@@ -9,12 +9,12 @@ tests/EXPECT.c++:26:one_plus_one_failing: ERROR: EXPECT(x+x == 3)
 not ok 4 - one_plus_one_failing:tests/EXPECT.c++:22
 ok 5 - call_expect_from_a_function:tests/EXPECT.c++:34
 tests/REQUIRE.c++:6:REQUIRE_true_then_false: ERROR: REQUIRE(false)
-not ok 6 - REQUIRE_true_then_false:tests/REQUIRE.c++:3
+not ok 6 - REQUIRE_true_then_false:tests/REQUIRE.c++:3: aborted
 tests/REQUIRE.c++:11:REQUIRE_false_then_true: ERROR: REQUIRE(false)
-not ok 7 - REQUIRE_false_then_true:tests/REQUIRE.c++:9
+not ok 7 - REQUIRE_false_then_true:tests/REQUIRE.c++:9: aborted
 ok 8 - one_plus_one_passing:tests/REQUIRE.c++:15
 tests/REQUIRE.c++:26:one_plus_one_failing: ERROR: REQUIRE(x+x == 3)
-not ok 9 - one_plus_one_failing:tests/REQUIRE.c++:22
+not ok 9 - one_plus_one_failing:tests/REQUIRE.c++:22: aborted
 ok 10 - call_require_from_a_function:tests/REQUIRE.c++:34
 ok 11 - TEST_works:tests/TEST.c++:3
 ok 12 - duplicate_test_names_are_ok:tests/TEST.c++:5
@@ -36,6 +36,6 @@ ok 27 - increment:tests/TEST_METHOD.c++:35
 ok 28 - decrement:tests/TEST_METHOD.c++:43
 ok 29 - no_exception:tests/exceptions.c++:4
 tests/exceptions.c++:8:runtime_error: ERROR: unexpected exception: runtime error occured
-not ok 30 - runtime_error:tests/exceptions.c++:8
+not ok 30 - runtime_error:tests/exceptions.c++:8: aborted
 tests/exceptions.c++:14:unknown_exception: ERROR: unknown exception
-not ok 31 - unknown_exception:tests/exceptions.c++:14
+not ok 31 - unknown_exception:tests/exceptions.c++:14: aborted

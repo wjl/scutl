@@ -15,4 +15,4 @@ scutl: tests/exceptions.c++:8:runtime_error: ERROR: unexpected exception: runtim
 Expect an unknown exception
 scutl: tests/exceptions.c++:14:unknown_exception: ERROR: unknown exception
 scutl: SUMMARY: |count   |started |complete|passed  |failed  |aborted |
-scutl: SUMMARY: |      31|      31|      31|      25|       6|       5|
+scutl: SUMMARY: |      31|      31|      31|      23|       8|       5|

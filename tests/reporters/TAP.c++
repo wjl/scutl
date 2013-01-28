@@ -1,3 +1,2 @@
-#define SCUTL_MAIN
-#define SCUTL_REPORTER scutl::TAP_Reporter
+#define SCUTL_REPORTER TAP_Reporter
 #include <scutl.h++>

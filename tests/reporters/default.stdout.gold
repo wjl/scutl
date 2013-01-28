@@ -1,73 +1,73 @@
 scutl: Running 31 tests ...
 scutl: tests/EXPECT.c++:3:EXPECT_true_then_false: starting
 scutl: tests/EXPECT.c++:6:EXPECT_true_then_false: ERROR: EXPECT(false)
-scutl: tests/EXPECT.c++:3:EXPECT_true_then_false: completed
+scutl: tests/EXPECT.c++:3:EXPECT_true_then_false: failed
 scutl: tests/EXPECT.c++:9:EXPECT_false_then_true: starting
 scutl: tests/EXPECT.c++:11:EXPECT_false_then_true: ERROR: EXPECT(false)
-scutl: tests/EXPECT.c++:9:EXPECT_false_then_true: completed
+scutl: tests/EXPECT.c++:9:EXPECT_false_then_true: failed
 scutl: tests/EXPECT.c++:15:one_plus_one_passing: starting
-scutl: tests/EXPECT.c++:15:one_plus_one_passing: completed
+scutl: tests/EXPECT.c++:15:one_plus_one_passing: passed
 scutl: tests/EXPECT.c++:22:one_plus_one_failing: starting
 scutl: tests/EXPECT.c++:26:one_plus_one_failing: ERROR: EXPECT(x+x == 3)
-scutl: tests/EXPECT.c++:22:one_plus_one_failing: completed
+scutl: tests/EXPECT.c++:22:one_plus_one_failing: failed
 scutl: tests/EXPECT.c++:34:call_expect_from_a_function: starting
-scutl: tests/EXPECT.c++:34:call_expect_from_a_function: completed
+scutl: tests/EXPECT.c++:34:call_expect_from_a_function: passed
 scutl: tests/REQUIRE.c++:3:REQUIRE_true_then_false: starting
 scutl: tests/REQUIRE.c++:6:REQUIRE_true_then_false: ERROR: REQUIRE(false)
-scutl: tests/REQUIRE.c++:3:REQUIRE_true_then_false: completed
+scutl: tests/REQUIRE.c++:3:REQUIRE_true_then_false: failed (aborted)
 scutl: tests/REQUIRE.c++:9:REQUIRE_false_then_true: starting
 scutl: tests/REQUIRE.c++:11:REQUIRE_false_then_true: ERROR: REQUIRE(false)
-scutl: tests/REQUIRE.c++:9:REQUIRE_false_then_true: completed
+scutl: tests/REQUIRE.c++:9:REQUIRE_false_then_true: failed (aborted)
 scutl: tests/REQUIRE.c++:15:one_plus_one_passing: starting
-scutl: tests/REQUIRE.c++:15:one_plus_one_passing: completed
+scutl: tests/REQUIRE.c++:15:one_plus_one_passing: passed
 scutl: tests/REQUIRE.c++:22:one_plus_one_failing: starting
 scutl: tests/REQUIRE.c++:26:one_plus_one_failing: ERROR: REQUIRE(x+x == 3)
-scutl: tests/REQUIRE.c++:22:one_plus_one_failing: completed
+scutl: tests/REQUIRE.c++:22:one_plus_one_failing: failed (aborted)
 scutl: tests/REQUIRE.c++:34:call_require_from_a_function: starting
-scutl: tests/REQUIRE.c++:34:call_require_from_a_function: completed
+scutl: tests/REQUIRE.c++:34:call_require_from_a_function: passed
 scutl: tests/TEST.c++:3:TEST_works: starting
-scutl: tests/TEST.c++:3:TEST_works: completed
+scutl: tests/TEST.c++:3:TEST_works: passed
 scutl: tests/TEST.c++:5:duplicate_test_names_are_ok: starting
-scutl: tests/TEST.c++:5:duplicate_test_names_are_ok: completed
+scutl: tests/TEST.c++:5:duplicate_test_names_are_ok: passed
 scutl: tests/TEST.c++:6:duplicate_test_names_are_ok: starting
-scutl: tests/TEST.c++:6:duplicate_test_names_are_ok: completed
+scutl: tests/TEST.c++:6:duplicate_test_names_are_ok: passed
 scutl: tests/TEST.c++:7:duplicate_test_names_are_ok: starting
-scutl: tests/TEST.c++:7:duplicate_test_names_are_ok: completed
+scutl: tests/TEST.c++:7:duplicate_test_names_are_ok: passed
 scutl: tests/TEST.c++:10:TEST_works_in_an_arbitrary_namespace: starting
-scutl: tests/TEST.c++:10:TEST_works_in_an_arbitrary_namespace: completed
+scutl: tests/TEST.c++:10:TEST_works_in_an_arbitrary_namespace: passed
 scutl: tests/TEST_METHOD.c++:5:TEST_METHOD_works: starting
-scutl: tests/TEST_METHOD.c++:5:TEST_METHOD_works: completed
+scutl: tests/TEST_METHOD.c++:5:TEST_METHOD_works: passed
 scutl: tests/TEST_METHOD.c++:7:TEST_METHOD_duplicate_test_names_are_ok: starting
-scutl: tests/TEST_METHOD.c++:7:TEST_METHOD_duplicate_test_names_are_ok: completed
+scutl: tests/TEST_METHOD.c++:7:TEST_METHOD_duplicate_test_names_are_ok: passed
 scutl: tests/TEST_METHOD.c++:8:TEST_METHOD_duplicate_test_names_are_ok: starting
-scutl: tests/TEST_METHOD.c++:8:TEST_METHOD_duplicate_test_names_are_ok: completed
+scutl: tests/TEST_METHOD.c++:8:TEST_METHOD_duplicate_test_names_are_ok: passed
 scutl: tests/TEST_METHOD.c++:9:TEST_METHOD_duplicate_test_names_are_ok: starting
-scutl: tests/TEST_METHOD.c++:9:TEST_METHOD_duplicate_test_names_are_ok: completed
+scutl: tests/TEST_METHOD.c++:9:TEST_METHOD_duplicate_test_names_are_ok: passed
 scutl: tests/TEST_METHOD.c++:12:TEST_METHOD_works_in_an_arbitrary_namespace: starting
-scutl: tests/TEST_METHOD.c++:12:TEST_METHOD_works_in_an_arbitrary_namespace: completed
+scutl: tests/TEST_METHOD.c++:12:TEST_METHOD_works_in_an_arbitrary_namespace: passed
 scutl: tests/TEST_METHOD.c++:21:fixture_is_unmodified: starting
-scutl: tests/TEST_METHOD.c++:21:fixture_is_unmodified: completed
+scutl: tests/TEST_METHOD.c++:21:fixture_is_unmodified: passed
 scutl: tests/TEST_METHOD.c++:22:fixture_is_unmodified: starting
-scutl: tests/TEST_METHOD.c++:22:fixture_is_unmodified: completed
+scutl: tests/TEST_METHOD.c++:22:fixture_is_unmodified: passed
 scutl: tests/TEST_METHOD.c++:23:fixture_is_unmodified: starting
-scutl: tests/TEST_METHOD.c++:23:fixture_is_unmodified: completed
+scutl: tests/TEST_METHOD.c++:23:fixture_is_unmodified: passed
 scutl: tests/TEST_METHOD.c++:24:fixture_is_unmodified: starting
-scutl: tests/TEST_METHOD.c++:24:fixture_is_unmodified: completed
+scutl: tests/TEST_METHOD.c++:24:fixture_is_unmodified: passed
 scutl: tests/TEST_METHOD.c++:25:fixture_is_unmodified: starting
-scutl: tests/TEST_METHOD.c++:25:fixture_is_unmodified: completed
+scutl: tests/TEST_METHOD.c++:25:fixture_is_unmodified: passed
 scutl: tests/TEST_METHOD.c++:26:fixture_is_unmodified: starting
-scutl: tests/TEST_METHOD.c++:26:fixture_is_unmodified: completed
+scutl: tests/TEST_METHOD.c++:26:fixture_is_unmodified: passed
 scutl: tests/TEST_METHOD.c++:35:increment: starting
-scutl: tests/TEST_METHOD.c++:35:increment: completed
+scutl: tests/TEST_METHOD.c++:35:increment: passed
 scutl: tests/TEST_METHOD.c++:43:decrement: starting
-scutl: tests/TEST_METHOD.c++:43:decrement: completed
+scutl: tests/TEST_METHOD.c++:43:decrement: passed
 scutl: tests/exceptions.c++:4:no_exception: starting
-scutl: tests/exceptions.c++:4:no_exception: completed
+scutl: tests/exceptions.c++:4:no_exception: passed
 scutl: tests/exceptions.c++:8:runtime_error: starting
 scutl: tests/exceptions.c++:8:runtime_error: ERROR: unexpected exception: runtime error occured
-scutl: tests/exceptions.c++:8:runtime_error: completed
+scutl: tests/exceptions.c++:8:runtime_error: failed (aborted)
 scutl: tests/exceptions.c++:14:unknown_exception: starting
 scutl: tests/exceptions.c++:14:unknown_exception: ERROR: unknown exception
-scutl: tests/exceptions.c++:14:unknown_exception: completed
+scutl: tests/exceptions.c++:14:unknown_exception: failed (aborted)
 scutl: SUMMARY: |count   |started |complete|passed  |failed  |aborted |
-scutl: SUMMARY: |      31|      31|      31|      25|       6|       5|
+scutl: SUMMARY: |      31|      31|      31|      23|       8|       5|
