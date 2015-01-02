@@ -116,8 +116,8 @@
 //
 // Even though scutl is entirely self-contained in a single file, and may be
 // embedded in a project rather than being installed system-wide, it's highly
-// to use the appropriate compiler flags (such as -I for gcc) to make this
-// syntax work either way.
+// recommended to use the appropriate compiler flags (such as -I for gcc) to
+// make this syntax work either way.
 //
 // Creating Tests & Using Fixtures
 // -------------------------------
