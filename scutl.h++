@@ -1,7 +1,7 @@
 // Scutl -- Simple C++ Unit Testing Library
 // by Wesley J. Landaker <wjl@icecavern.net>
 // =========================================
-// Version 1.1.1
+// Version 1.1.2
 //
 // Scutl is a unit testing library that makes it painless to add unit tests to
 // your software with a minimum of hassle. The entire library implementation
@@ -294,6 +294,7 @@
 #include <iomanip>
 #include <iostream>
 #include <list>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -348,9 +349,11 @@
 			info.aborted = true;\
 		}\
 		virtual void operator()() {\
-			function();\
+			function.reset(new Function);\
+			function->operator()();\
+			function.reset(nullptr);\
 		};\
-		Function function;\
+		std::unique_ptr<Function> function;\
 	};\
 \
 	/* Create an instance of the test, which will cause auto-registration */\
